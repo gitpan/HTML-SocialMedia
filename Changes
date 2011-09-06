@@ -1,0 +1,14 @@
+Revision history for HTML-SocialMedia
+
+0.04	Tue Sep  6 11:02:09 EDT 2011
+	Added twitter_related option to new
+	Renamed HTML-SocialMedia
+
+0.03	Mon Sep  5 12:14:32 EDT 2011
+	Fixed Facebook button language localisation
+
+0.02	Mon Sep  5 07:19:32 EDT 2011
+	Fixed the Facebook like button
+
+0.01	Sun Sep  4 23:25:47 EDT 2011
+        First draft
