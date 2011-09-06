@@ -1,5 +1,8 @@
 Revision history for HTML-SocialMedia
 
+0.05
+	Google plus one wasn't being emmitted in as_string()
+
 0.04	Tue Sep  6 11:02:09 EDT 2011
 	Added twitter_related option to new
 	Renamed HTML-SocialMedia

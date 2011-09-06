@@ -11,11 +11,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.04
+Version 0.05
 
 =cut
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 =head1 SYNOPSIS
 
@@ -122,9 +122,17 @@ sub as_string {
 			}
 		}
 		if($params{twitter_tweet_button}) {
-			$rc .= '<script src="http://platform.twitter.com/widgets.js" type="text/javascript"></script><p>';
-			$rc .= '<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="' .
-				$self->{_twitter} . '"';
+			$rc .= << 'END';
+				<script type="text/javascript">
+					var t = document.createElement('SCRIPT'), t1 = document.getElementsByTagName('HEAD')[0];
+					t.type = 'text/javascript';
+					t.async = true;
+					t.src = "http://platform.twitter.com/widgets.js";
+					t1.parentNode.insertBefore(t, t1);
+				</script>
+				<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="' .
+END
+			$rc .= $self->{_twitter} . '"';
 			if($self->{_twitter_related}) {
 				my @related = @{$self->{_twitter_related}};
 				$rc .= ' data-related="' . $related[0] . ':' . $related[1] . '"';
@@ -133,12 +141,15 @@ sub as_string {
 		}
 	}
 	if($params{facebook_like_button}) {
+		if($params{twitter_tweet_button} || $params{twitter_follow_button}) {
+			$rc .= '<p>';
+		}
 		$rc .= << 'END';
 			<div id="facebook">
 			<div id="fb-root"></div>
 			<script type="text/javascript">
 				document.write('<' + 'fb:like send="false" layout="button_count" width="100" show_faces="false" font=""></fb:like>');
-				var s = document.createElement('SCRIPT'), s1 = document.getElementsByTagName('SCRIPT')[0];
+				var s = document.createElement('SCRIPT'), s1 = document.getElementsByTagName('HEAD')[0];
 				s.type = 'text/javascript';
 				s.async = true;
 END
@@ -148,10 +159,12 @@ END
 			s1.parentNode.insertBefore(s, s1);
 		    </script>
 		</div>
-		<p>
 END
+		if($params{google_plusone}) {
+			$rc .= '<p>';
+		}
 	}
-	if($params{google_plus}) {
+	if($params{google_plusone}) {
 		$rc .= << 'END';
 			<div id="gplus">
 				<script type="text/javascript" src="https://apis.google.com/js/plusone.js">
