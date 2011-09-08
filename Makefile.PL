@@ -14,7 +14,7 @@ WriteMakefile(
     PREREQ_PM => {
         'Test::More' => 0.82,	# Needs new_ok
 	'Test::NoWarnings' => 0,
-	'CGI::Lingua' => 0,
+	'CGI::Lingua' => 0.25,	# Needs fix for agent handling to HTML::Clean
 	'I18N::LangTags::Detect' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

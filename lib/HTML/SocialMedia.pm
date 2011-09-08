@@ -11,11 +11,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 =head1 SYNOPSIS
 
@@ -120,6 +120,9 @@ sub as_string {
 			} else {
 				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . " class=\"twitter-follow-button\" data-lang=\"$alpha2\">Follow \@" . $self->{_twitter} . '</a>';
 			}
+			if($params{twitter_tweet_button}) {
+				$rc .= '<p>';
+			}
 		}
 		if($params{twitter_tweet_button}) {
 			$rc .= << 'END';
@@ -130,7 +133,7 @@ sub as_string {
 					t.src = "http://platform.twitter.com/widgets.js";
 					t1.parentNode.insertBefore(t, t1);
 				</script>
-				<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="' .
+				<a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="
 END
 			$rc .= $self->{_twitter} . '"';
 			if($self->{_twitter_related}) {
@@ -153,7 +156,7 @@ END
 				s.type = 'text/javascript';
 				s.async = true;
 END
-		$rc .= "s.src = 'http://connect.facebook.net/$alpha2/all.js#xfbml=1';";
+		$rc .= "s.src = \"http://connect.facebook.net/$alpha2/all.js#xfbml=1\";";
 
 		$rc .= << 'END';
 			s1.parentNode.insertBefore(s, s1);
