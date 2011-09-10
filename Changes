@@ -1,5 +1,9 @@
 Revision history for HTML-SocialMedia
 
+0.07
+	Beefed up the example in the documentation
+	Improved internationalisation support
+
 0.06	Thu Sep  8 18:28:35 EDT 2011
 	Fixed some line up issues
 

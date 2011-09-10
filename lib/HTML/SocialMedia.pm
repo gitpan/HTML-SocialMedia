@@ -11,11 +11,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.06
+Version 0.07
 
 =cut
 
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 =head1 SYNOPSIS
 
@@ -82,9 +82,25 @@ Returns the HTML to be added to your website.
 HTML::SocialMedia used CGI::Lingua to try to ensure that the text printed is in
 the language of the user.
 
-	my $sm = HTML::SocialMedia->new(twitter => 'mytwittername');
+	use HTML::SocialMedia;
 
-	print $sm->as_string(twitter_follow_button => 1, google_plusone => 1);
+	my $sm = HTML::SocialMedia->new(
+		twitter => 'mytwittername',
+		twotter_related => [ 'someonelikeme', 'another twitter feed' ]
+	);
+
+	print "Content-type: text/html\n\n";
+
+	print'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';print '<HTML><HEAD></HEAD><BODY>';
+	print $sm->as_string(
+		twitter_follow_button => 1,
+		twitter_tweet_button => 1,
+		facebook_like_button => 1,
+		google_plusone => 1
+	);
+                
+	print '</BODY></HTML>';
+	print "\n";
 
 =head3 Optional parameters
 
@@ -101,13 +117,20 @@ google_plusone: add a Google +1 button
 sub as_string {
 	my ($self, %params) = @_;
 
-	my $alpha2;
-	my $locale = $self->{_lingua}->locale();
-	if($locale) {
-		my @l = $locale->languages_official();
-		$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+	my $alpha2 = $self->{_lingua}->code_alpha2();
+
+	if($alpha2) {
+		my $salpha2 = $self->{_lingua}->sublanguage_code_alpha2();
+		$salpha2 = uc(($salpha2) ? $salpha2 : $alpha2);
+		$alpha2 .= "_$salpha2";
 	} else {
-		$alpha2 = 'en_GB';
+		my $locale = $self->{_lingua}->locale();
+		if($locale) {
+			my @l = $locale->languages_official();
+			$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+		} else {
+			$alpha2 = 'en_GB';
+		}
 	}
 
 	my $rc;

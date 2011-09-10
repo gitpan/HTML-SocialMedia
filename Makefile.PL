@@ -12,9 +12,9 @@ WriteMakefile(
       : ()),
     PL_FILES            => {},
     PREREQ_PM => {
-        'Test::More' => 0.82,	# Needs new_ok
+        'Test::More' => 0.82,	# Need new_ok()
 	'Test::NoWarnings' => 0,
-	'CGI::Lingua' => 0.25,	# Needs fix for agent handling to HTML::Clean
+	'CGI::Lingua' => 0.26,	# Need subcountry_code_alpha2()
 	'I18N::LangTags::Detect' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 15;
+use Test::More tests => 18;
 use Test::NoWarnings;
 
 BEGIN {
@@ -21,6 +21,13 @@ ROBOT: {
 	$ENV{'REQUEST_METHOD'} = 'GET';
 	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr-FR';
 	$ENV{'HTTP_USER_AGENT'} = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; fr-FR; rv:1.9.2.19) Gecko/20110707 Firefox/3.6.19';
+	$sm = new_ok('HTML::SocialMedia' => []);
+	ok(defined($sm->as_string(facebook_like_button => 1)));
+	ok($sm->as_string(facebook_like_button => 1) =~ /fr_FR/);
+
+	# Asking for French with a US browser should display in French
+	$ENV{'HTTP_USER_AGENT'} = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; en-US; rv:1.9.2.19) Gecko/20110707 Firefox/3.6.19';
+	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr';
 	$sm = new_ok('HTML::SocialMedia' => []);
 	ok(defined($sm->as_string(facebook_like_button => 1)));
 	ok($sm->as_string(facebook_like_button => 1) =~ /fr_FR/);
