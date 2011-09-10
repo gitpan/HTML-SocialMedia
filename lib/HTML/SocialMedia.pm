@@ -11,11 +11,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.07
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 SYNOPSIS
 
@@ -55,11 +55,9 @@ sub new {
 		$lingua = CGI::Lingua->new(supported => ['en', 'nl', 'fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr']),
 	} else {
 		# Facebook supports just about everything
-		my @l = I18N::LangTags::Detect::detect();
+		my @l = I18N::LangTags::implicate_supers_strictly(I18N::LangTags::Detect::detect());
 		if(@l) {
-			my $lang = $l[0];
-			$lang =~ s/-/_/;
-			$lingua = CGI::Lingua->new(supported => [$lang]);
+			$lingua = CGI::Lingua->new(supported => [$l[0]]);
 		}
 		unless($lingua) {
 			$lingua = CGI::Lingua->new(supported => []);
@@ -82,25 +80,25 @@ Returns the HTML to be added to your website.
 HTML::SocialMedia used CGI::Lingua to try to ensure that the text printed is in
 the language of the user.
 
-	use HTML::SocialMedia;
+    use HTML::SocialMedia;
 
-	my $sm = HTML::SocialMedia->new(
-		twitter => 'mytwittername',
-		twotter_related => [ 'someonelikeme', 'another twitter feed' ]
-	);
+    my $sm = HTML::SocialMedia->new(
+    	twitter => 'mytwittername',
+    	twotter_related => [ 'someonelikeme', 'another twitter feed' ]
+    );
 
-	print "Content-type: text/html\n\n";
+    print "Content-type: text/html\n\n";
 
-	print'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';print '<HTML><HEAD></HEAD><BODY>';
-	print $sm->as_string(
-		twitter_follow_button => 1,
-		twitter_tweet_button => 1,
-		facebook_like_button => 1,
-		google_plusone => 1
-	);
-                
-	print '</BODY></HTML>';
-	print "\n";
+    print'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';print '<HTML><HEAD></HEAD><BODY>';
+    print $sm->as_string(
+    	twitter_follow_button => 1,
+    	twitter_tweet_button => 1,
+    	facebook_like_button => 1,
+    	google_plusone => 1
+    );
+
+    print '</BODY></HTML>';
+    print "\n";
 
 =head3 Optional parameters
 
