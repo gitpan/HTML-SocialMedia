@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 21;
+use Test::More tests => 27;
 use Test::NoWarnings;
 
 BEGIN {
@@ -30,12 +30,23 @@ ROBOT: {
 	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr';
 	$sm = new_ok('HTML::SocialMedia' => []);
 	ok(defined($sm->as_string(facebook_like_button => 1)));
-	ok($sm->as_string(facebook_like_button => 1) =~ /fr_FR/);
+	# Unlikely scenario - but this is what we get
+	ok($sm->as_string(facebook_like_button => 1) =~ /fr_US/);
 
 	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr-FR';
 	$sm = new_ok('HTML::SocialMedia' => []);
 	ok(defined($sm->as_string(facebook_like_button => 1)));
 	ok($sm->as_string(facebook_like_button => 1) =~ /fr_FR/);
+
+	$ENV{'HTTP_USER_AGENT'} = 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2 Iceweasel/6.0.2';
+	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'en-gb,en;q=0.5';
+	$sm = new_ok('HTML::SocialMedia' => []);
+	ok(defined($sm->as_string(facebook_like_button => 1)));
+	ok($sm->as_string(facebook_like_button => 1) =~ /en_GB/);
+
+	$sm = new_ok('HTML::SocialMedia' => [ twitter => 'example', twitter_related => ['example1', 'description of example1'] ]);
+	ok(defined($sm->as_string(facebook_like_button => 1)));
+	ok($sm->as_string(facebook_like_button => 1, twitter_follow_button => 1, twitter_tweet_button => 1, google_plusone => 1) =~ /en_GB/);
 
 	$sm = new_ok('HTML::SocialMedia' => [ twitter => 'example', twitter_related => ['example1', 'description of example1'] ]);
 	ok(defined($sm->as_string(twitter_tweet_button => 1)));

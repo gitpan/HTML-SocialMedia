@@ -11,11 +11,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 SYNOPSIS
 
@@ -119,9 +119,27 @@ sub as_string {
 
 	if($alpha2) {
 		my $salpha2 = $self->{_lingua}->sublanguage_code_alpha2();
-		$salpha2 = uc(($salpha2) ? $salpha2 : $alpha2);
-		$alpha2 .= "_$salpha2";
-	} else {
+		unless($salpha2) {
+			my $locale = $self->{_lingua}->locale();
+			if($locale) {
+				$salpha2 = $locale->code_alpha2();
+			}
+		}
+		if($salpha2) {
+			$salpha2 = uc($salpha2);
+			$alpha2 .= "_$salpha2";
+		} else {
+			my $locale = $self->{_lingua}->locale();
+			if($locale) {
+				my @l = $locale->languages_official();
+				$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+			} else {
+				$alpha2 = undef;
+			}
+		}
+	}
+
+	unless($alpha2) {
 		my $locale = $self->{_lingua}->locale();
 		if($locale) {
 			my @l = $locale->languages_official();
