@@ -11,11 +11,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
@@ -52,7 +52,7 @@ sub new {
 	if($params{twitter}) {
 		# Languages supported by Twitter according to
 		# https://twitter.com/about/resources/tweetbutton
-		$lingua = CGI::Lingua->new(supported => ['en', 'nl', 'fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr']),
+		$lingua = CGI::Lingua->new(supported => ['en', 'nl', 'fr', 'fr-fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr']),
 	} else {
 		# Facebook supports just about everything
 		my @l = I18N::LangTags::implicate_supers_strictly(I18N::LangTags::Detect::detect());
@@ -157,7 +157,8 @@ sub as_string {
 			if(($language eq 'English') || ($language eq 'Unknown')) {
 				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . '" class="twitter-follow-button">Follow @' . $self->{_twitter} . '</a>';
 			} else {
-				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . " class=\"twitter-follow-button\" data-lang=\"$alpha2\">Follow \@" . $self->{_twitter} . '</a>';
+				my $langcode = substr($alpha2, 0, 2);
+				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . " class=\"twitter-follow-button\" data-lang=\"$langcode\">Follow \@" . $self->{_twitter} . '</a>';
 			}
 			if($params{twitter_tweet_button}) {
 				$rc .= '<p>';

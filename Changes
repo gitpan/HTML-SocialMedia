@@ -1,5 +1,8 @@
 Revision history for HTML-SocialMedia
 
+0.10	Wed Sep 14 15:20:20 EDT 2011
+	Fixed twitter follow button internationalisation
+
 0.09	Sun Sep 11 13:10:35 EDT 2011
 	Better handling of unlikely internationalisation scenarios
 
