@@ -33,8 +33,10 @@ ROBOT: {
 	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr';
 	$sm = new_ok('HTML::SocialMedia' => []);
 	ok(defined($sm->as_string(facebook_like_button => 1)));
-	# Unlikely scenario - but this is what we get
-	ok($sm->as_string(facebook_like_button => 1) =~ /fr_US/);
+	# There is no fr_US locale for Facebook, so HTML::SocialMedia  will fall
+	# back to en_GB.
+	# TODO: It should fall back to fr_FR
+	ok($sm->as_string(facebook_like_button => 1) =~ /en_GB/);
 	ok(!defined($sm->as_string(twitter_tweet_button => 1)));
 
 	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr-FR';

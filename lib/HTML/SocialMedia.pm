@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use CGI::Lingua;
 use I18N::LangTags::Detect;
+use LWP::UserAgent;
 
 =head1 NAME
 
@@ -11,11 +12,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -158,7 +159,7 @@ sub as_string {
 				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . '" class="twitter-follow-button">Follow @' . $self->{_twitter} . '</a>';
 			} else {
 				my $langcode = substr($alpha2, 0, 2);
-				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . " class=\"twitter-follow-button\" data-lang=\"$langcode\">Follow \@" . $self->{_twitter} . '</a>';
+				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . "\" class=\"twitter-follow-button\" data-lang=\"$langcode\">Follow \@" . $self->{_twitter} . '</a>';
 			}
 			if($params{twitter_tweet_button}) {
 				$rc .= '<p>';
@@ -187,6 +188,27 @@ END
 		if($params{twitter_tweet_button} || $params{twitter_follow_button}) {
 			$rc .= '<p>';
 		}
+
+		# See if Facebook supports our wanted language. If not then
+		# I suppose we could enuerate through other requested languages,
+		# but that is probably not worth the effort.
+
+		my $url = "http://connect.facebook.net/$alpha2/all.js#xfbml=1";
+
+		# Resposnse is of type HTTP::Response
+		my $response = LWP::UserAgent->new->request(HTTP::Request->new(GET => $url));
+		if($response->is_success()) {
+			# If it's not supported, Facebook doesn't return an HTTP
+			# error such as 404, it returns a string, which no doubt
+			# will get changed at sometime in the future. Sigh.
+			if($response->decoded_content() =~ /is not a valid locale/) {
+				# TODO: Guess more appropriate fallbacks
+				$url = 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
+			}
+		} else {
+			$url = 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
+		}
+
 		$rc .= << 'END';
 			<div id="facebook">
 			<div id="fb-root"></div>
@@ -196,7 +218,7 @@ END
 				s.type = 'text/javascript';
 				s.async = true;
 END
-		$rc .= "s.src = \"http://connect.facebook.net/$alpha2/all.js#xfbml=1\";";
+		$rc .= "s.src = \"$url\";";
 
 		$rc .= << 'END';
 			s1.parentNode.insertBefore(s, s1);
