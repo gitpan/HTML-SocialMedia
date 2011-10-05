@@ -1,5 +1,10 @@
 Revision history for HTML-SocialMedia
 
+0.12
+	Added support for LinkedIn's share button
+	Added render: synonym for as_string() added for compatability with
+		HTML::Adsense
+
 0.11	Thu Sep 15 12:55:58 EDT 2011
 	If the brower's chosen language isn't supported by Facebook, then
 		fallback to en_GB.  It would be nice to try more sensible choices,

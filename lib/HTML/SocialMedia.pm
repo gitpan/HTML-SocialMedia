@@ -3,8 +3,6 @@ package HTML::SocialMedia;
 use warnings;
 use strict;
 use CGI::Lingua;
-use I18N::LangTags::Detect;
-use LWP::UserAgent;
 
 =head1 NAME
 
@@ -12,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 =head1 SYNOPSIS
 
@@ -47,7 +45,9 @@ twitter_related: array of 2 elements - the name and description of a related acc
 =cut
 
 sub new {
-	my ($class, %params) = @_;
+	my ($proto, %params) = @_;
+
+	my $class = ref($proto) || $proto;
 
 	my $lingua;
 	if($params{twitter}) {
@@ -55,6 +55,7 @@ sub new {
 		# https://twitter.com/about/resources/tweetbutton
 		$lingua = CGI::Lingua->new(supported => ['en', 'nl', 'fr', 'fr-fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr']),
 	} else {
+		use I18N::LangTags::Detect;
 		# Facebook supports just about everything
 		my @l = I18N::LangTags::implicate_supers_strictly(I18N::LangTags::Detect::detect());
 		if(@l) {
@@ -69,6 +70,7 @@ sub new {
 		_lingua => $lingua,
 		_twitter => $params{twitter},
 		_twitter_related => $params{twitter_related},
+		_alpha2 => undef,
 	};
 	bless $self, $class;
 
@@ -78,8 +80,8 @@ sub new {
 =head2 as_string
 
 Returns the HTML to be added to your website.
-HTML::SocialMedia used CGI::Lingua to try to ensure that the text printed is in
-the language of the user.
+HTML::SocialMedia uses L<CGI::Lingua> to try to ensure that the text printed is
+in the language of the user.
 
     use HTML::SocialMedia;
 
@@ -95,6 +97,7 @@ the language of the user.
     	twitter_follow_button => 1,
     	twitter_tweet_button => 1,
     	facebook_like_button => 1,
+	linkedin_share_button => 1,
     	google_plusone => 1
     );
 
@@ -109,6 +112,8 @@ twitter_tweet_button: add a button to tweet this page
 
 facebook_like_button: add a Facebook like button
 
+linkedin_share_button; add a LinkedIn share button
+
 google_plusone: add a Google +1 button
 
 =cut
@@ -116,38 +121,41 @@ google_plusone: add a Google +1 button
 sub as_string {
 	my ($self, %params) = @_;
 
-	my $alpha2 = $self->{_lingua}->code_alpha2();
+	unless($self->{_alpha2}) {
+		my $alpha2 = $self->{_lingua}->code_alpha2();
 
-	if($alpha2) {
-		my $salpha2 = $self->{_lingua}->sublanguage_code_alpha2();
-		unless($salpha2) {
-			my $locale = $self->{_lingua}->locale();
-			if($locale) {
-				$salpha2 = $locale->code_alpha2();
+		if($alpha2) {
+			my $salpha2 = $self->{_lingua}->sublanguage_code_alpha2();
+			unless($salpha2) {
+				my $locale = $self->{_lingua}->locale();
+				if($locale) {
+					$salpha2 = $locale->code_alpha2();
+				}
+			}
+			if($salpha2) {
+				$salpha2 = uc($salpha2);
+				$alpha2 .= "_$salpha2";
+			} else {
+				my $locale = $self->{_lingua}->locale();
+				if($locale) {
+					my @l = $locale->languages_official();
+					$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+				} else {
+					$alpha2 = undef;
+				}
 			}
 		}
-		if($salpha2) {
-			$salpha2 = uc($salpha2);
-			$alpha2 .= "_$salpha2";
-		} else {
+
+		unless($alpha2) {
 			my $locale = $self->{_lingua}->locale();
 			if($locale) {
 				my @l = $locale->languages_official();
 				$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
 			} else {
-				$alpha2 = undef;
+				$alpha2 = 'en_GB';
 			}
 		}
-	}
-
-	unless($alpha2) {
-		my $locale = $self->{_lingua}->locale();
-		if($locale) {
-			my @l = $locale->languages_official();
-			$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
-		} else {
-			$alpha2 = 'en_GB';
-		}
+		$self->{_alpha2} = $alpha2;
 	}
 
 	my $rc;
@@ -158,7 +166,7 @@ sub as_string {
 			if(($language eq 'English') || ($language eq 'Unknown')) {
 				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . '" class="twitter-follow-button">Follow @' . $self->{_twitter} . '</a>';
 			} else {
-				my $langcode = substr($alpha2, 0, 2);
+				my $langcode = substr($self->{_alpha2}, 0, 2);
 				$rc = '<a href="http://twitter.com/' . $self->{_twitter} . "\" class=\"twitter-follow-button\" data-lang=\"$langcode\">Follow \@" . $self->{_twitter} . '</a>';
 			}
 			if($params{twitter_tweet_button}) {
@@ -193,9 +201,11 @@ END
 		# I suppose we could enuerate through other requested languages,
 		# but that is probably not worth the effort.
 
-		my $url = "http://connect.facebook.net/$alpha2/all.js#xfbml=1";
+		my $url = "http://connect.facebook.net/$self->{_alpha2}/all.js#xfbml=1";
 
 		# Resposnse is of type HTTP::Response
+		require LWP::UserAgent;
+
 		my $response = LWP::UserAgent->new->request(HTTP::Request->new(GET => $url));
 		if($response->is_success()) {
 			# If it's not supported, Facebook doesn't return an HTTP
@@ -225,9 +235,15 @@ END
 		    </script>
 		</div>
 END
-		if($params{google_plusone}) {
+		if($params{google_plusone} || $params{linkedin_share_button}) {
 			$rc .= '<p>';
 		}
+	}
+	if($params{linkedin_share_button}) {
+		$rc .= << 'END';
+<script src="http://platform.linkedin.com/in.js" type="text/javascript"></script>
+<script type="IN/Share" data-counter="right"></script>
+END
 	}
 	if($params{google_plusone}) {
 		$rc .= << 'END';
@@ -245,6 +261,18 @@ END
 	}
 
 	return $rc;
+}
+
+=head2 render
+
+Synonym for as_string.
+
+=cut
+
+sub render {
+	my ($self, %params) = @_;
+
+	return $self->as_string(%params);
 }
 
 =head1 AUTHOR

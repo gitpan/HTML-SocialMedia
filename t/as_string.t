@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 37;
+use Test::More tests => 40;
 use Test::NoWarnings;
 
 BEGIN {
@@ -66,4 +66,7 @@ ROBOT: {
 	ok($sm->as_string(twitter_tweet_button => 1) =~ /data-related/);
 	ok($sm->as_string(twitter_tweet_button => 1) =~ /example1:description of example1/);
 	ok($sm->as_string(twitter_follow_button => 1) !~ /data-lang="/);
+	ok($sm->as_string(linkedin_share_button => 1) =~ /linkedin/);
+	ok($sm->as_string(twitter_tweet_button => 1) !~ /linkedin/);
+	ok($sm->as_string(twitter_follow_button => 1) eq $sm->render(twitter_follow_button => 1));
 }
