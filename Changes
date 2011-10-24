@@ -1,14 +1,19 @@
 Revision history for HTML-SocialMedia
 
-0.12
+0.13
+	Ensured consistent spacecing between LinkedIn and Google plus1 on
+		Firefox and IE
+	Added Reddit
+
+0.12	Wed Oct  5 13:42:51 EDT 2011
 	Added support for LinkedIn's share button
 	Added render: synonym for as_string() added for compatability with
 		HTML::Adsense
 
 0.11	Thu Sep 15 12:55:58 EDT 2011
 	If the brower's chosen language isn't supported by Facebook, then
-		fallback to en_GB.  It would be nice to try more sensible choices,
-		perhaps later.
+		fallback to en_GB.  It would be nice to try more sensible
+		choices, perhaps later.
 
 0.10	Wed Sep 14 15:20:20 EDT 2011
 	Fixed twitter follow button internationalisation

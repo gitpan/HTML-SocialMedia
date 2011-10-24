@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.12
+Version 0.13
 
 =cut
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =head1 SYNOPSIS
 
@@ -22,7 +22,6 @@ Many websites these days have links and buttons into social media sites.
 This module eases links into Twitter, Facebook and Google's PlusOne.
 
     use HTML::SocialMedia;
-
     my $sm = HTML::SocialMedia->new();
     # ...
 
@@ -33,7 +32,6 @@ This module eases links into Twitter, Facebook and Google's PlusOne.
 Creates a HTML::SocialMedia object.
 
     use HTML::SocialMedia;
-
     my $sm = HTML::SocialMedia->new(twitter => 'example');
     # ...
 
@@ -84,21 +82,21 @@ HTML::SocialMedia uses L<CGI::Lingua> to try to ensure that the text printed is
 in the language of the user.
 
     use HTML::SocialMedia;
-
     my $sm = HTML::SocialMedia->new(
-    	twitter => 'mytwittername',
-    	twotter_related => [ 'someonelikeme', 'another twitter feed' ]
+	twitter => 'mytwittername',
+	twotter_related => [ 'someonelikeme', 'another twitter feed' ]
     );
 
     print "Content-type: text/html\n\n";
 
-    print'<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';print '<HTML><HEAD></HEAD><BODY>';
+    print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';print '<HTML><HEAD></HEAD><BODY>';
     print $sm->as_string(
-    	twitter_follow_button => 1,
-    	twitter_tweet_button => 1,
-    	facebook_like_button => 1,
+	twitter_follow_button => 1,
+	twitter_tweet_button => 1,
+	facebook_like_button => 1,
 	linkedin_share_button => 1,
-    	google_plusone => 1
+	google_plusone => 1,
+	reddit_button => 1,
     );
 
     print '</BODY></HTML>';
@@ -112,7 +110,7 @@ twitter_tweet_button: add a button to tweet this page
 
 facebook_like_button: add a Facebook like button
 
-linkedin_share_button; add a LinkedIn share button
+linkedin_share_button: add a LinkedIn share button
 
 google_plusone: add a Google +1 button
 
@@ -235,7 +233,7 @@ END
 		    </script>
 		</div>
 END
-		if($params{google_plusone} || $params{linkedin_share_button}) {
+		if($params{google_plusone} || $params{linkedin_share_button} || $params{reddit_button}) {
 			$rc .= '<p>';
 		}
 	}
@@ -244,6 +242,9 @@ END
 <script src="http://platform.linkedin.com/in.js" type="text/javascript"></script>
 <script type="IN/Share" data-counter="right"></script>
 END
+		if($params{google_plusone} || $params{reddit_button}) {
+			$rc .= '<p>';
+		}
 	}
 	if($params{google_plusone}) {
 		$rc .= << 'END';
@@ -258,6 +259,12 @@ END
 				</script>
 			</div>
 END
+		if($params{reddit_button}) {
+			$rc .= '<p>';
+		}
+	}
+	if($params{reddit_button}) {
+		$rc .= '<script type="text/javascript" src="http://www.reddit.com/static/button/button1.js"></script>';
 	}
 
 	return $rc;
