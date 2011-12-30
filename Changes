@@ -1,6 +1,11 @@
 Revision history for HTML-SocialMedia
 
-0.13
+0.14	Thu Dec 29 21:40:15 EST 2011
+	Added some author tests
+	Fixed dependancy
+	Changed to new Google plusone code, including multi-lingual support
+
+0.13	Mon Oct 24 14:26:23 EDT 2011
 	Ensured consistent spacecing between LinkedIn and Google plus1 on
 		Firefox and IE
 	Added Reddit

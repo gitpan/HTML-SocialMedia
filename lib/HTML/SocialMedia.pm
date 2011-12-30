@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.13
+Version 0.14
 
 =cut
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 =head1 SYNOPSIS
 
@@ -53,7 +53,10 @@ sub new {
 		# https://twitter.com/about/resources/tweetbutton
 		$lingua = CGI::Lingua->new(supported => ['en', 'nl', 'fr', 'fr-fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr']),
 	} else {
-		use I18N::LangTags::Detect;
+		# TODO: Google plus only supports the languages listed at
+		# http://www.google.com/webmasters/+1/button/index.html
+		require I18N::LangTags::Detect;
+
 		# Facebook supports just about everything
 		my @l = I18N::LangTags::implicate_supers_strictly(I18N::LangTags::Detect::detect());
 		if(@l) {
@@ -247,17 +250,33 @@ END
 		}
 	}
 	if($params{google_plusone}) {
-		$rc .= << 'END';
-			<div id="gplus">
-				<script type="text/javascript" src="https://apis.google.com/js/plusone.js">
-					{"parsetags": "explicit"}
-				</script>
-				<div id="plusone-div"></div>
+		# $rc .= << 'END';
+			# <div id="gplus">
+				# <script type="text/javascript" src="https://apis.google.com/js/plusone.js">
+					# {"parsetags": "explicit"}
+				# </script>
+				# <div id="plusone-div"></div>
+# 
+				# <script type="text/javascript">
+					# gapi.plusone.render("plusone-div",{"size": "medium", "count": "true"});
+				# </script>
+			# </div>
+# END
+		$rc .= '<g:plusone></g:plusone>';
+		$rc .= '<script type="text/javascript">';
+		my $alpha2 = $self->{_alpha2};
+		if(defined($alpha2)) {
+			$alpha2 =~ s/_/-/;
+			$rc .= "window.___gcfg = {lang: '$alpha2'};\n";
+		}
 
-				<script type="text/javascript">
-					gapi.plusone.render("plusone-div",{"size": "medium", "count": "true"});
-				</script>
-			</div>
+		$rc .= << 'END';
+			  (function() {
+			    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+			    po.src = 'https://apis.google.com/js/plusone.js';
+			    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+			  })();
+			</script>
 END
 		if($params{reddit_button}) {
 			$rc .= '<p>';

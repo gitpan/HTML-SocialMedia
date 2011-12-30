@@ -17,6 +17,7 @@ WriteMakefile(
 	'CGI::Lingua' => 0.26,	# Need subcountry_code_alpha2()
 	'I18N::LangTags::Detect' => 0,
 	'LWP::UserAgent' => 0,
+	'Test::Kwalitee' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'HTML-SocialMedia-*' },

@@ -2,14 +2,14 @@
 
 use strict;
 use warnings;
-use Test::More tests => 40;
+use Test::More tests => 45;
 use Test::NoWarnings;
 
 BEGIN {
 	use_ok('HTML::SocialMedia');
 }
 
-ROBOT: {
+STRING: {
 	my $sm = new_ok('HTML::SocialMedia');
 	ok(!defined($sm->as_string()));
 
@@ -69,4 +69,14 @@ ROBOT: {
 	ok($sm->as_string(linkedin_share_button => 1) =~ /linkedin/);
 	ok($sm->as_string(twitter_tweet_button => 1) !~ /linkedin/);
 	ok($sm->as_string(twitter_follow_button => 1) eq $sm->render(twitter_follow_button => 1));
+
+	$sm = new_ok('HTML::SocialMedia' => []);
+	ok(defined($sm->as_string(facebook_like_button => 1)));
+	ok($sm->as_string(google_plusone => 1) =~ /en-GB/);
+
+	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr-FR';
+	$ENV{'HTTP_USER_AGENT'} = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; fr-FR; rv:1.9.2.19) Gecko/20110707 Firefox/3.6.19';
+	$sm = new_ok('HTML::SocialMedia' => []);
+	ok($sm->as_string(google_plusone => 1) =~ /fr-FR/);
+
 }

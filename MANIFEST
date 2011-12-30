@@ -9,12 +9,18 @@ t/as_string.t
 t/boiler.t
 t/coverage.t
 t/critic.t
+t/cv.t
+t/gv.t
 t/kwalitee.t
 t/manifest.t
 t/metrics.t
 t/pod-cm.t
 t/pod.t
 t/port.t
+t/prereq.t
 t/snippets.t
+t/spelling.t
+t/vars.t
 META.yml                                 Module meta-data (added by MakeMaker)
+MYMETA.json
 META.json                                Module JSON meta-data (added by MakeMaker)
