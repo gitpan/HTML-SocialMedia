@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.14
+Version 0.15
 
 =cut
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 =head1 SYNOPSIS
 
@@ -256,7 +256,7 @@ END
 					# {"parsetags": "explicit"}
 				# </script>
 				# <div id="plusone-div"></div>
-# 
+				#
 				# <script type="text/javascript">
 					# gapi.plusone.render("plusone-div",{"size": "medium", "count": "true"});
 				# </script>
@@ -270,10 +270,21 @@ END
 			$rc .= "window.___gcfg = {lang: '$alpha2'};\n";
 		}
 
-		$rc .= << 'END';
+		require CGI::Info;
+
+		my $info = CGI::Info->new();
+
+		my $protocol;
+		if(defined($info->protocol()) && ($info->protocol() eq 'https')) {
+			$protocol = 'https';
+		} else {
+			$protocol = 'http';
+		}
+
+		$rc .= << "END";
 			  (function() {
 			    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-			    po.src = 'https://apis.google.com/js/plusone.js';
+			    po.src = '$protocol://apis.google.com/js/plusone.js';
 			    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
 			  })();
 			</script>
@@ -352,7 +363,7 @@ L<http://search.cpan.org/dist/HTML-SocialMedia/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011 Nigel Horne.
+Copyright 2011-2012 Nigel Horne.
 
 This program is released under the following licence: GPL
 

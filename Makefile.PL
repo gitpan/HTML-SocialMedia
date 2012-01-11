@@ -18,6 +18,7 @@ WriteMakefile(
 	'I18N::LangTags::Detect' => 0,
 	'LWP::UserAgent' => 0,
 	'Test::Kwalitee' => 0,
+	'CGI::Info' => 0.10,	# Needs protocol()
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'HTML-SocialMedia-*' },

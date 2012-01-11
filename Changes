@@ -1,5 +1,10 @@
 Revision history for HTML-SocialMedia
 
+0.15	Wed Jan 11 10:39:20 GMT 2012
+	Google PlusOne: use http or https as needed rather than always using
+		https
+	Fix as_string test if Facebook supports fr_US
+
 0.14	Thu Dec 29 21:40:15 EST 2011
 	Added some author tests
 	Fixed dependancy
