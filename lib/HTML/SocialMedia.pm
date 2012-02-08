@@ -10,11 +10,12 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.15
+Version 0.16
 
 =cut
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
+use constant DEFAULTFACEBOOKURL => 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
 
 =head1 SYNOPSIS
 
@@ -39,6 +40,8 @@ Creates a HTML::SocialMedia object.
 
 twitter: twitter account name
 twitter_related: array of 2 elements - the name and description of a related account
+cache: This object will be an instantiation of a class that understands get and
+set, such as L<CHI>.
 
 =cut
 
@@ -59,11 +62,20 @@ sub new {
 
 		# Facebook supports just about everything
 		my @l = I18N::LangTags::implicate_supers_strictly(I18N::LangTags::Detect::detect());
+		my %args;
+
 		if(@l) {
-			$lingua = CGI::Lingua->new(supported => [$l[0]]);
+			$args{supported} = [$l[0]];
+		} else {
+			$args{supported} = [];
 		}
-		unless($lingua) {
-			$lingua = CGI::Lingua->new(supported => []);
+		if($params{cache}) {
+			$args{cache} = $params{cache};
+		}
+		$lingua = CGI::Lingua->new(%args);
+		if((!defined($lingua)) && @l) {
+			$args{supported} = [];
+			$lingua = CGI::Lingua->new(%args);
 		}
 	}
 
@@ -71,6 +83,7 @@ sub new {
 		_lingua => $lingua,
 		_twitter => $params{twitter},
 		_twitter_related => $params{twitter_related},
+		_cache => $params{cache},
 		_alpha2 => undef,
 	};
 	bless $self, $class;
@@ -203,21 +216,39 @@ END
 		# but that is probably not worth the effort.
 
 		my $url = "http://connect.facebook.net/$self->{_alpha2}/all.js#xfbml=1";
+		my $res;
+		if($self->{_cache}) {
+			$res = $self->{_cache}->get("HTTP::SocialMedia $url");
+		}
 
-		# Resposnse is of type HTTP::Response
-		require LWP::UserAgent;
-
-		my $response = LWP::UserAgent->new->request(HTTP::Request->new(GET => $url));
-		if($response->is_success()) {
-			# If it's not supported, Facebook doesn't return an HTTP
-			# error such as 404, it returns a string, which no doubt
-			# will get changed at sometime in the future. Sigh.
-			if($response->decoded_content() =~ /is not a valid locale/) {
-				# TODO: Guess more appropriate fallbacks
-				$url = 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
+		if(defined($res)) {
+			unless($res) {
+				$url = DEFAULTFACEBOOKURL;
 			}
 		} else {
-			$url = 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
+			# Resposnse is of type HTTP::Response
+			require LWP::UserAgent;
+
+			my $response = LWP::UserAgent->new->request(HTTP::Request->new(GET => $url));
+			if($response->is_success()) {
+				# If it's not supported, Facebook doesn't return an HTTP
+				# error such as 404, it returns a string, which no doubt
+				# will get changed at sometime in the future. Sigh.
+				if($response->decoded_content() =~ /is not a valid locale/) {
+					# TODO: Guess more appropriate fallbacks
+					$url = DEFAULTFACEBOOKURL;
+					if($self->{_cache}) {
+						$self->{_cache}->set("HTTP::SocialMedia $url", 0, 600);
+					}
+				} elsif($self->{_cache}) {
+					$self->{_cache}->set("HTTP::SocialMedia $url", 1, 600);
+				}
+			} else {
+				$url = DEFAULTFACEBOOKURL;
+				if($self->{_cache}) {
+					$self->{_cache}->set("HTTP::SocialMedia $url", 0, 600);
+				}
+			}
 		}
 
 		$rc .= << 'END';
@@ -318,7 +349,7 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 
 =head1 BUGS
 
-Please report any bugs or feature requests to C<bug-cgi-socialmedia at rt.cpan.org>, or through
+Please report any bugs or feature requests to C<bug-html-socialmedia at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=HTML-SocialMedia>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 

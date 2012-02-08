@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 45;
+use Test::More tests => 46;
 use Test::NoWarnings;
 
 BEGIN {
@@ -10,6 +10,23 @@ BEGIN {
 }
 
 STRING: {
+	my $cache;
+
+	eval {
+		require CHI;
+
+		CHI->import;
+	};
+
+	if($@) {
+		diag("CHI not installed");
+		$cache = undef;
+	} else {
+		diag("Using CHI $CHI::VERSION");
+		my $hash = {};
+		$cache = CHI->new(driver => 'Memory', datastore => $hash);
+	}
+
 	my $sm = new_ok('HTML::SocialMedia');
 	ok(!defined($sm->as_string()));
 
@@ -71,9 +88,10 @@ STRING: {
 	ok($sm->as_string(twitter_tweet_button => 1) !~ /linkedin/);
 	ok($sm->as_string(twitter_follow_button => 1) eq $sm->render(twitter_follow_button => 1));
 
-	$sm = new_ok('HTML::SocialMedia' => []);
+	$sm = new_ok('HTML::SocialMedia' => [cache => $cache]);
 	ok(defined($sm->as_string(facebook_like_button => 1)));
 	ok($sm->as_string(google_plusone => 1) =~ /en-GB/);
+	ok(defined($sm->as_string(facebook_like_button => 1)));
 
 	$ENV{'HTTP_ACCEPT_LANGUAGE'} = 'fr-FR';
 	$ENV{'HTTP_USER_AGENT'} = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; fr-FR; rv:1.9.2.19) Gecko/20110707 Firefox/3.6.19';
