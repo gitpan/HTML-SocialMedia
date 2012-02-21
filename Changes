@@ -1,5 +1,8 @@
 Revision history for HTML-SocialMedia
 
+0.18
+	Improved caching use with Twitter
+
 0.17	Sat Feb 11 21:47:15 EST 2012
 	Only do kwalitee test in author environment because it throws too
 		many false positives

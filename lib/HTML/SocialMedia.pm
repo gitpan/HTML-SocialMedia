@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.17
+Version 0.18
 
 =cut
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 use constant DEFAULTFACEBOOKURL => 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
 
 =head1 SYNOPSIS
@@ -51,10 +51,11 @@ sub new {
 	my $class = ref($proto) || $proto;
 
 	my $lingua;
+	my %args;
 	if($params{twitter}) {
 		# Languages supported by Twitter according to
 		# https://twitter.com/about/resources/tweetbutton
-		$lingua = CGI::Lingua->new(supported => ['en', 'nl', 'fr', 'fr-fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr']),
+		$args{supported} = ['en', 'nl', 'fr', 'fr-fr', 'de', 'id', 'il', 'ja', 'ko', 'pt', 'ru', 'es', 'tr'],
 	} else {
 		# TODO: Google plus only supports the languages listed at
 		# http://www.google.com/webmasters/+1/button/index.html
@@ -62,21 +63,20 @@ sub new {
 
 		# Facebook supports just about everything
 		my @l = I18N::LangTags::implicate_supers_strictly(I18N::LangTags::Detect::detect());
-		my %args;
 
 		if(@l) {
 			$args{supported} = [$l[0]];
 		} else {
 			$args{supported} = [];
 		}
-		if($params{cache}) {
-			$args{cache} = $params{cache};
-		}
+	}
+	if($params{cache}) {
+		$args{cache} = $params{cache};
+	}
+	$lingua = CGI::Lingua->new(%args);
+	if((!defined($lingua)) && scalar($args{supported})) {
+		$args{supported} = [];
 		$lingua = CGI::Lingua->new(%args);
-		if((!defined($lingua)) && @l) {
-			$args{supported} = [];
-			$lingua = CGI::Lingua->new(%args);
-		}
 	}
 
 	my $self = {
