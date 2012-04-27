@@ -1,5 +1,9 @@
 Revision history for HTML-SocialMedia
 
+0.19	Fri Apr 27 13:36:21 BST 2012
+	Handle https://rt.cpan.org/Ticket/Display.html?id=57479
+	Timeout after 10 seconds attempting to connect to Facebook
+
 0.18
 	Improved caching use with Twitter
 

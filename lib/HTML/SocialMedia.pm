@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.18
+Version 0.19
 
 =cut
 
-our $VERSION = '0.18';
+our $VERSION = '0.19';
 use constant DEFAULTFACEBOOKURL => 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
 
 =head1 SYNOPSIS
@@ -164,8 +164,16 @@ sub as_string {
 			my $locale = $self->{_lingua}->locale();
 			if($locale) {
 				my @l = $locale->languages_official();
-				$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
-			} else {
+				if(scalar(@l)) {
+					$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+				} else {
+					@l = $locale->languages();
+					if(scalar(@l)) {
+						$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+					}
+				}
+			}
+			unless($alpha2) {
 				$alpha2 = 'en_GB';
 			}
 		}
@@ -216,6 +224,7 @@ END
 		# but that is probably not worth the effort.
 
 		my $url = "http://connect.facebook.net/$self->{_alpha2}/all.js#xfbml=1";
+$rc .= "<!-- url - $url -->";
 		my $res;
 		if($self->{_cache}) {
 			$res = $self->{_cache}->get("HTTP::SocialMedia $url");
@@ -229,7 +238,7 @@ END
 			# Resposnse is of type HTTP::Response
 			require LWP::UserAgent;
 
-			my $response = LWP::UserAgent->new->request(HTTP::Request->new(GET => $url));
+			my $response = LWP::UserAgent->new(timeout => 10)->request(HTTP::Request->new(GET => $url));
 			if($response->is_success()) {
 				# If it's not supported, Facebook doesn't return an HTTP
 				# error such as 404, it returns a string, which no doubt
