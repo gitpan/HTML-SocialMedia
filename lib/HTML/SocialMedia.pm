@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.19
+Version 0.20
 
 =cut
 
-our $VERSION = '0.19';
+our $VERSION = '0.20';
 use constant DEFAULTFACEBOOKURL => 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
 
 =head1 SYNOPSIS
@@ -25,6 +25,19 @@ This module eases links into Twitter, Facebook and Google's PlusOne.
     use HTML::SocialMedia;
     my $sm = HTML::SocialMedia->new();
     # ...
+
+The language of the text displayed will depend on the client's choice, making
+HTML::SocialMedia ideal for running on multilingual sites.
+
+Takes optional parameter logger, an object which is used for warnings and
+traces.
+This logger object is an object that understands warn() and trace() messages,
+such as a L<Log::Log4perl> object.
+
+Takes optional parameter cache, an object which is used to cache country
+lookups.
+This cache object is an object that understands get() and set() messages,
+such as an L<CHI> object.
 
 =head1 SUBROUTINES/METHODS
 
@@ -73,6 +86,9 @@ sub new {
 	if($params{cache}) {
 		$args{cache} = $params{cache};
 	}
+	if($params{logger}) {
+		$args{logger} = $params{logger};
+	}
 	$lingua = CGI::Lingua->new(%args);
 	if((!defined($lingua)) && scalar($args{supported})) {
 		$args{supported} = [];
@@ -105,7 +121,9 @@ in the language of the user.
 
     print "Content-type: text/html\n\n";
 
-    print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';print '<HTML><HEAD></HEAD><BODY>';
+    print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';
+    print '<HTML><HEAD></HEAD><BODY>';
+
     print $sm->as_string(
 	twitter_follow_button => 1,
 	twitter_tweet_button => 1,
@@ -130,13 +148,15 @@ linkedin_share_button: add a LinkedIn share button
 
 google_plusone: add a Google +1 button
 
+reddit_button: add a Reddit button
+
 =cut
 
 sub as_string {
 	my ($self, %params) = @_;
 
 	unless($self->{_alpha2}) {
-		my $alpha2 = $self->{_lingua}->code_alpha2();
+		my $alpha2 = $self->{_lingua}->language_code_alpha2();
 
 		if($alpha2) {
 			my $salpha2 = $self->{_lingua}->sublanguage_code_alpha2();
@@ -153,7 +173,7 @@ sub as_string {
 				my $locale = $self->{_lingua}->locale();
 				if($locale) {
 					my @l = $locale->languages_official();
-					$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+					$alpha2 = lc($l[0]->language_code_alpha2()) . '_' . uc($locale->code_alpha2());
 				} else {
 					$alpha2 = undef;
 				}
@@ -164,12 +184,12 @@ sub as_string {
 			my $locale = $self->{_lingua}->locale();
 			if($locale) {
 				my @l = $locale->languages_official();
-				if(scalar(@l)) {
-					$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+				if(scalar(@l) && defined($l[0]->language_code_alpha2())) {
+					$alpha2 = lc($l[0]->language_code_alpha2()) . '_' . uc($locale->language_code_alpha2());
 				} else {
 					@l = $locale->languages();
 					if(scalar(@l)) {
-						$alpha2 = lc($l[0]->code_alpha2()) . '_' . uc($locale->code_alpha2());
+						$alpha2 = lc($l[0]->language_code_alpha2()) . '_' . uc($locale->language_code_alpha2());
 					}
 				}
 			}
@@ -224,10 +244,11 @@ END
 		# but that is probably not worth the effort.
 
 		my $url = "http://connect.facebook.net/$self->{_alpha2}/all.js#xfbml=1";
-$rc .= "<!-- url - $url -->";
+		# Debug
+		# $rc .= "<!-- url - $url -->";
 		my $res;
 		if($self->{_cache}) {
-			$res = $self->{_cache}->get("HTTP::SocialMedia $url");
+			$res = $self->{_cache}->get($url);
 		}
 
 		if(defined($res)) {
@@ -247,15 +268,15 @@ $rc .= "<!-- url - $url -->";
 					# TODO: Guess more appropriate fallbacks
 					$url = DEFAULTFACEBOOKURL;
 					if($self->{_cache}) {
-						$self->{_cache}->set("HTTP::SocialMedia $url", 0, 600);
+						$self->{_cache}->set($url, 0, '10 minutes');
 					}
 				} elsif($self->{_cache}) {
-					$self->{_cache}->set("HTTP::SocialMedia $url", 1, 600);
+					$self->{_cache}->set($url, 1, '10 minutes');
 				}
 			} else {
 				$url = DEFAULTFACEBOOKURL;
 				if($self->{_cache}) {
-					$self->{_cache}->set("HTTP::SocialMedia $url", 0, 600);
+					$self->{_cache}->set($url, 0, '10 minutes');
 				}
 			}
 		}
@@ -312,12 +333,8 @@ END
 
 		require CGI::Info;
 
-		my $info = CGI::Info->new();
-
-		my $protocol;
-		if(defined($info->protocol()) && ($info->protocol() eq 'https')) {
-			$protocol = 'https';
-		} else {
+		my $protocol = CGI::Info->protocol();
+		if((!defined($protocol)) || ($protocol eq 'https')) {
 			$protocol = 'http';
 		}
 
@@ -358,14 +375,15 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 
 =head1 BUGS
 
+When adding a FaceBook like button, you may find performance improves a lot if
+you use L<HTTP::Cache::Transparent>.
+
 Please report any bugs or feature requests to C<bug-html-socialmedia at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=HTML-SocialMedia>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 
 =head1 SEE ALSO
-
-HTTP::BrowserDetect
 
 
 =head1 SUPPORT
@@ -403,7 +421,7 @@ L<http://search.cpan.org/dist/HTML-SocialMedia/>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2011-2012 Nigel Horne.
+Copyright 2011-2014 Nigel Horne.
 
 This program is released under the following licence: GPL
 

@@ -12,7 +12,7 @@ WriteMakefile(
       : ()),
     PL_FILES            => {},
     PREREQ_PM => {
-        'Test::More' => 0.82,	# Need new_ok()
+	'Test::Most' => 0,
 	'Test::NoWarnings' => 0,
 	'CGI::Lingua' => 0.26,	# Need subcountry_code_alpha2()
 	'I18N::LangTags::Detect' => 0,
@@ -22,4 +22,15 @@ WriteMakefile(
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'HTML-SocialMedia-*' },
+    META_MERGE		=> {
+    	'meta-spec' => { version => 2 },
+    	resources => {
+    		repository => {
+			type => 'git',
+			url => 'git://github.com/nigelhorne/HTML-SocialMedia.git',
+			web => 'https://github.com/nigelhorne/HTML-SocialMedia',
+    		},
+	},
+    },
+    MIN_PERL_VERSION	=> '5.6.2'	# Probably would work, but never tested on earlier versions than this
 );
