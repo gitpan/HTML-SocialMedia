@@ -10,11 +10,11 @@ HTML::SocialMedia - Put social media links into your website
 
 =head1 VERSION
 
-Version 0.20
+Version 0.21
 
 =cut
 
-our $VERSION = '0.20';
+our $VERSION = '0.21';
 use constant DEFAULTFACEBOOKURL => 'http://connect.facebook.net/en_GB/all.js#xfbml=1';
 
 =head1 SYNOPSIS
@@ -38,6 +38,8 @@ Takes optional parameter cache, an object which is used to cache country
 lookups.
 This cache object is an object that understands get() and set() messages,
 such as an L<CHI> object.
+
+Takes optional parameter, which is a L<CGI::Lingua> object.
 
 =head1 SUBROUTINES/METHODS
 
@@ -89,7 +91,7 @@ sub new {
 	if($params{logger}) {
 		$args{logger} = $params{logger};
 	}
-	$lingua = CGI::Lingua->new(%args);
+	$lingua = $params{lingua} || CGI::Lingua->new(%args);
 	if((!defined($lingua)) && scalar($args{supported})) {
 		$args{supported} = [];
 		$lingua = CGI::Lingua->new(%args);
